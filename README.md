@@ -17,3 +17,9 @@ python3 sntp-server.py [--delay смещение]
 ```
 python3 sntp-client.py -s localhost:5000
 ```
+
+## tracert
+Утилита показывая `traceroute` до какого нибудь хоста, по пути определяя номер автономной системы и страну маршрутизатора
+```
+sudo python3 tracert-as.py ya.ru
+```

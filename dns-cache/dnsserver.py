@@ -1,6 +1,3 @@
-# Author: Yunqiao Zhang
-# Email: zhangyunqiao@gmail.com
-
 '''
 Implement a simple dns cache module to reduce dns resolve time. Also avoid
 too many hit to DNS server. This module might not be thread safe.

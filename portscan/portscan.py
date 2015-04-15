@@ -1,6 +1,11 @@
+from threading import Thread, active_count
 import socket
 import argparse
 import sys
+import csv
+
+tcpports = []
+udpports = []
 
 
 def get_args():
@@ -20,7 +25,31 @@ def get_args():
         '-p', '--ports',
         default='1-1024',
         help='The ports you want to scan (21,22,80,24-42)')
+    parser.add_argument(
+        '-m', '--multithreading',
+        default=10,
+        help='Thread count',
+        type=int)
     return parser.parse_args()
+
+
+def get_db():
+    db = {
+        'udp': {},
+        'tcp': {}
+    }
+    with open('service-names-port-numbers.csv') as csv_file:
+        data = csv.reader(csv_file)
+        try:
+            for rec in data:
+                if rec[0] != 'Service Name':
+                    try:
+                        db[rec[2]].update({rec[1]: rec[0]})
+                    except KeyError:
+                        pass
+        except UnicodeDecodeError:
+            pass
+    return db
 
 
 def main():
@@ -34,29 +63,36 @@ def main():
 
     db = get_db()
 
-    tcpports = portscan(
-        args.target, ports, args.tcpscan, args.all, db)
+    print(("Now scanning {}".format(args.target)))
+    port_offset = len(ports) // args.multithreading
+    for i in range(args.multithreading):
+        t = Thread(
+            target=portscan,
+            args=(
+                args.target,
+                ports[port_offset*i:port_offset*(i+1)],
+                args.tcpscan, args.all, db, ))
+        t.start()
 
 
 def portscan(target, ports, tcp, all, db):
-    print(("Now scanning %s" % (target)))
-    tcpports = []
-    udpports = []
     if tcp:
-        for portnum in ports:
+        for port in ports:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.settimeout(1)
-                s.connect((target, portnum))
+                s.connect((target, port))
             except Exception:
-                failvar = 0
                 if all:
-                    print("{:0<5}/tcp \tclosed".format(portnum))
+                    print("{:0<5}/tcp \tclosed".format(port))
             else:
-                print("{}/tcp \topen".format(portnum))
-                tcpports.append(portnum)
+                try:
+                    print("{}/tcp \t{} \topen".format(
+                        port, db['tcp'][str(port)]))
+                except KeyError:
+                    print("{}/tcp \topen".format(port))
+                tcpports.append(port)
             s.close()
-    return tcpports
 
 if __name__ == '__main__':
     main()

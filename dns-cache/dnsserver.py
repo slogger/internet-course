@@ -8,7 +8,6 @@ DNS_REFRESH_TIME = 3600
 
 import socket
 import datetime
-# from util.decorator import Singleton
 import urllib.parse
 
 
@@ -43,7 +42,6 @@ class DNSCache(object, metaclass=Singleton):
                         now = datetime.datetime.now()
                         age = now - timestamp
                         if age.seconds > DNS_REFRESH_TIME:
-                                # Refresh DNS cache.
                                 return _get_addr(hostname)
                         else:
                                 return addr
@@ -69,23 +67,13 @@ def ipify(url):
         parts[1] = c.get_addr(parts[1])
         return urllib.parse.urlunsplit(parts)
 
-# Unit Test & Sample
 if __name__ == "__main__":
         dns = DNSCache()
 
-        # Should raise DNSError.
         try:
                 print((ipify('http://www.googlerrrr.com')))
         except DNSError as e:
                 print(e)
 
-        # from util.timing import Timing
-        # First dns resolve for www.google.com.
-        # t = Timing()
-        # with t:
         print((ipify('http://www.google.com')))
-        # print(t)
-
-        # with t:
         print((ipify('http://www.google.com/?a=x')))
-        # print(t)

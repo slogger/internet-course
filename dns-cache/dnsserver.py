@@ -61,7 +61,7 @@ class DNSCache(object, metaclass=Singleton):
                         raise DNSError('DNS returns nothing.')
 
 
-def ipify(url):
+def get_ip(url):
         parts = list(urllib.parse.urlsplit(url))
         c = DNSCache()
         parts[1] = c.get_addr(parts[1])
@@ -71,9 +71,12 @@ if __name__ == "__main__":
         dns = DNSCache()
 
         try:
-                print((ipify('http://www.googlerrrr.com')))
+                print((get_ip('http://www.googlerrrr.com')))
         except DNSError as e:
                 print(e)
 
-        print((ipify('http://www.google.com')))
-        print((ipify('http://www.google.com/?a=x')))
+        print(get_ip('http://www.google.com'))
+        print(get_ip('http://www.vk.com/'))
+        print(get_ip('http://www.google.com/?a=x'))
+        print(get_ip('http://www.e1.ru/'))
+        print(get_ip('http://www.google.com/?a=1'))

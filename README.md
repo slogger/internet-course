@@ -8,7 +8,7 @@ Internet course at UrFU
 ## sntp
 Для запуска сервера, требуется `python 3.4` или выше
 
-Запускает сервер, по умолчанию на `5000` порту
+Запускаем сервер, по умолчанию на `5000` порту
 ```
 python3 sntp-server.py [--delay смещение]
 ```
@@ -29,6 +29,7 @@ sudo python3 tracert-as.py ya.ru
 ```
 python3 127.0.0.1 -tp all -m 5
 ```
+
 ```
 usage: portscan.py [-h] [-a] [-t] [-p PORTS] [-m MULTITHREADING] target
 
@@ -45,5 +46,10 @@ optional arguments:
                         The ports you want to scan (21,22,80,24-42)
   -m MULTITHREADING, --multithreading MULTITHREADING
                         Thread count
+```
 
+## dns
+Кэширующий DNS сервер
+```
+sudo python3 dns_server.py 8.8.4.4
 ```

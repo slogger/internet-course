@@ -23,3 +23,9 @@ python3 sntp-client.py -s localhost:5000
 ```
 sudo python3 tracert-as.py ya.ru
 ```
+
+## dns
+Кэширующий DNS сервер
+```
+sudo python3 dns_server.py 8.8.4.4
+```

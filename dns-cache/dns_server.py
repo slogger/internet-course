@@ -57,14 +57,14 @@ class DNS(object, metaclass=Singleton):
 
         for question in dns_msg.query:
             if question.name in self.cache.keys():
-                (answer, packet), timestamp = self.cache[question.name]
+                answer, timestamp = self.cache[question.name]
                 now = datetime.datetime.now()
                 age = now - timestamp
                 # print(answer)
                 if age.seconds > DNS_REFRESH_TIME:
                     return self._get_addr(question, dns_msg)
                 else:
-                    return packet
+                    return answer.pack()
             else:
                 return self._get_addr(question, dns_msg)
 
@@ -91,7 +91,7 @@ class DNS(object, metaclass=Singleton):
             answer = DNSMessage()
             answer.unpack(data)
             self.cache[question.name] = (
-                (answer, data), datetime.datetime.now())
+                answer, datetime.datetime.now())
             return data
         except Exception as e:
             self.err_count = self.err_count + 1

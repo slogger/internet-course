@@ -1,22 +1,26 @@
-DNS_REFRESH_TIME = 3600
-
 from socket import *
 import datetime
 import urllib.parse
 import asyncio
 import argparse
 from dns_packets import *
+import pickle
 
 
 def get_args():
     parser = argparse.ArgumentParser(description="DNS server")
     parser.add_argument(
         "forwarder",
+        default="8.8.4.4",
         help="Forwarder IP address")
     parser.add_argument(
         "--port",
         help="Port",
         default=53, type=int)
+    parser.add_argument(
+        "--ttl",
+        help="Time to life data in cache",
+        default=3600, type=int)
     args = parser.parse_args()
     return args
 
@@ -46,10 +50,11 @@ class Singleton(type):
 
 
 class DNS(object, metaclass=Singleton):
-    def __init__(self, forwarder):
-        self.cache = {}
+    def __init__(self, forwarder, ttl, cache):
+        self.cache = cache
         self.forwarder = forwarder
         self.err_count = 0
+        self.ttl = ttl
 
     def get_addr(self, packet):
         dns_msg = DNSMessage()
@@ -60,12 +65,14 @@ class DNS(object, metaclass=Singleton):
                 answer, timestamp = self.cache[question.name]
                 now = datetime.datetime.now()
                 age = now - timestamp
-                # print(answer)
-                if age.seconds > DNS_REFRESH_TIME:
+                if age.seconds > self.ttl:
+                    print('Record is too old\nGet new data')
                     return self._get_addr(question, dns_msg)
                 else:
+                    print('Record found in cache')
                     return answer.pack()
             else:
+                print('Record is not found')
                 return self._get_addr(question, dns_msg)
 
 
@@ -101,7 +108,11 @@ class DNS(object, metaclass=Singleton):
             raise DNSError(e)
 
 def main(args):
-    dns = DNS(args.forwarder)
+    try:
+        cache = pickle.load(open('dump', 'rb'))
+    except Exception:
+        cache = {}
+    dns = DNS(args.forwarder, args.ttl, cache)
     loop = asyncio.get_event_loop()
     listen = loop.create_datagram_endpoint(
         DNSServer, local_addr=('127.0.0.1', args.port))
@@ -110,7 +121,7 @@ def main(args):
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        pass
+        pickle.dump(dns.cache, open('dump', 'wb'))
 
     transport.close()
     loop.close()

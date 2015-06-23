@@ -32,6 +32,9 @@ class DNSServer(asyncio.Protocol):
     def datagram_received(self, data, addr):
         dns = DNS()
         answer = dns.get_addr(data)
+        while (answer is None):
+            answer = dns.get_addr(data)
+        print('yeeeep')
         self.transport.sendto(answer, addr)
 
 
@@ -50,7 +53,7 @@ class Singleton(type):
 
 
 class DNS(object, metaclass=Singleton):
-    def __init__(self, forwarder, ttl, cache):
+    def __init__(self, forwarder, ttl,  cache):
         self.cache = cache
         self.forwarder = forwarder
         self.err_count = 0
@@ -66,7 +69,7 @@ class DNS(object, metaclass=Singleton):
                 now = datetime.datetime.now()
                 age = now - timestamp
                 if age.seconds > self.ttl:
-                    print('Record is too old\nGet new data')
+                    print('Record is too old, get new data')
                     return self._get_addr(question, dns_msg)
                 else:
                     print('Record found in cache')
@@ -91,7 +94,7 @@ class DNS(object, metaclass=Singleton):
 
         try:
             with socket(AF_INET, SOCK_DGRAM) as new_socket:
-                new_socket.settimeout(2.0)
+                new_socket.settimeout(1)
                 new_socket.sendto(msg.pack(), (self.forwarder, 53))
                 data, addr = new_socket.recvfrom(1024)
 
@@ -103,9 +106,14 @@ class DNS(object, metaclass=Singleton):
         except Exception as e:
             self.err_count = self.err_count + 1
             # BLACK MAGICK
-            if self.err_count > 5:
+            print('DNS server is not reached', self.err_count)
+            if self.err_count > 6:
+                self.err_count = 0
+                return b''
+                # exit('Google is dead')
+            elif self.err_count > 5:
                 self.forwarder = '8.8.4.4'
-            raise DNSError(e)
+
 
 def main(args):
     try:
@@ -120,6 +128,8 @@ def main(args):
 
     try:
         loop.run_forever()
+    except DNSError as e:
+        print(e)
     except KeyboardInterrupt:
         pickle.dump(dns.cache, open('dump', 'wb'))
 

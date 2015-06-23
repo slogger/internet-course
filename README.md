@@ -55,5 +55,18 @@ sudo python3 dns_server.py 8.8.4.4
 
 ```
 
-#vk-api
+## vk-api
 Утилита выгружающая все фотографии из какого либо альбома пользователя vk.com в максимальном качестве
+
+## pop
+```
+./main -h
+Usage of ./main:
+  -login="example@mail.ru": is a pop server
+  -pass="pass": is a password
+  -port="995": is a port
+  -server="pop.mail.ru": is a pop server
+
+example:
+./main -login=pi201-2015@mail.ru -pass=2015pi201
+```

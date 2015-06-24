@@ -70,3 +70,30 @@ Usage of ./main:
 example:
 ./main -login=pi201-2015@mail.ru -pass=2015pi201
 ```
+
+## smtp
+```
+usage: smtp.py [-h] [--server SERVER] [--port PORT] [--username USERNAME]
+               [--subject SUBJECT] [--text TEXT] [--path PATH]
+               login password receiver
+
+DNS server
+
+positional arguments:
+  login                 Sender email addres (login)
+  password              Password
+  receiver              Receiver email addres
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --server SERVER       smtp server
+  --port PORT           Port
+  --username USERNAME   Username for EHLO
+  --subject SUBJECT, -s SUBJECT
+                        Message subject
+  --text TEXT, -t TEXT  Message text
+  --path PATH, -p PATH  Path for attachment
+
+example:
+python3 smtp.py pi201-2015@mail.ru 2015pi201 slogger1994@gmail.com --server smtp.mail.ru --port 465 -s "Hello world" -t "Hey, Slogger" -p pic
+```
